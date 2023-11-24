@@ -4,21 +4,21 @@ const mysql = require('mysql');
 
 
 //const hostname = '127.0.0.1';
-const port = process.env.PORT ||3000;
+const port = process.env.PORT || 3000;
 
 const server = http.createServer();
 const io = socketIO(server);
 var crashPosition = 1;
 var finalcrash = 0;
 var fly;
-var betamount =0;
+var betamount = 0;
 var clients = [];
 
 const connection = mysql.createConnection({
-  host: '95.216.36.254',
-  user: 'goutamde_12345678',
-  password: 'goutamde_12345678',
-  database: 'goutamde_12345678'
+  host: '62.72.28.63',
+  user: 'u366627993_Aviator',
+  password: 'u366627993_Aviator',
+  database: 'Aviator123@123'
 });
 
 //Function to set crash point
@@ -27,32 +27,32 @@ function setcrash() {
   connection.query(query9, (err, result) => {
     if (err) {
       console.error('Error adding record to database:', err);
-    }else{
-      if(result[0].total==null){
-        betamount =0;
-      }else{
-        betamount=result[0].total;
+    } else {
+      if (result[0].total == null) {
+        betamount = 0;
+      } else {
+        betamount = result[0].total;
       }
-     
-     if(betamount==0){
-      finalcrash =Math.floor(Math.random() * 6) + 2;
-      console.log('finalcrash0');
-      console.log(finalcrash,betamount);
-      repeatupdate(200);
-     }else if(betamount<=10){
-      finalcrash =(Math.random() * 0.5 + 1).toFixed(2); 
-      console.log('finalcrash100');
-      console.log(finalcrash,betamount);
-      repeatupdate(300);
-     }else{
-      finalcrash =(Math.random()* 0.5  + 1).toFixed(2); 
-      console.log('finalcrash12');
-      console.log(finalcrash,betamount);
-      repeatupdate(200);
-     }
+
+      if (betamount == 0) {
+        finalcrash = Math.floor(Math.random() * 6) + 2;
+        console.log('finalcrash0');
+        console.log(finalcrash, betamount);
+        repeatupdate(200);
+      } else if (betamount <= 10) {
+        finalcrash = (Math.random() * 0.5 + 1).toFixed(2);
+        console.log('finalcrash100');
+        console.log(finalcrash, betamount);
+        repeatupdate(300);
+      } else {
+        finalcrash = (Math.random() * 0.5 + 1).toFixed(2);
+        console.log('finalcrash12');
+        console.log(finalcrash, betamount);
+        repeatupdate(200);
+      }
     }
   });
-  
+
 }
 
 // Function to reset plane
@@ -66,7 +66,7 @@ function restartplane() {
   connection.query(query5, (err, result) => {
     if (err) {
       console.error('Error adding record to database:', err);
-    } 
+    }
   });
   io.emit('updatehistory', crashPosition);
 
@@ -76,7 +76,7 @@ function restartplane() {
     connection.query(query4, (err, result) => {
       if (err) {
         console.error('Error adding record to database:', err);
-      } 
+      }
     });
     io.volatile.emit('reset', 'resetting plane.....');
 
@@ -89,21 +89,21 @@ function restartplane() {
       io.emit('prepareplane');
       crashPosition = 0.99;
       io.emit('flyplane');
-     
+
       setTimeout(() => {
-      setcrash();
-    },1000)
+        setcrash();
+      }, 1000)
     }, 4000)
   }, 3000)
 
 }
 // Function to update crash multiplier
 function updateCrashInfo() {
-  var fc=parseFloat(finalcrash) ;
-  var cp=parseFloat(crashPosition);
-  if ( fc > cp ) {
+  var fc = parseFloat(finalcrash);
+  var cp = parseFloat(crashPosition);
+  if (fc > cp) {
     var cPosition = parseFloat(crashPosition);
-    crashPosition=(cPosition+0.03).toFixed(2);
+    crashPosition = (cPosition + 0.03).toFixed(2);
     io.emit('crash-update', crashPosition);
   } else {
     restartplane();
@@ -126,34 +126,34 @@ io.on('connection', (socket) => {
   });
 
   socket.on('newBet', function (username, amount) {
-    
+
     const bal = `SELECT balance From users  WHERE username = '${username}'`;
     connection.query(bal, (err, result) => {
       if (err) {
         console.error('Error adding record to database:', err);
-      }else{
-        if(result[0].balance>amount){
+      } else {
+        if (result[0].balance > amount) {
           const query1 = `UPDATE users SET balance = balance - ${amount} WHERE username = '${username}'`;
 
           connection.query(query1, (err, result) => {
             if (err) {
               console.error('Error adding record to database:', err);
-            } 
+            }
           });
           const query = `INSERT INTO crashbetrecord (username, amount) VALUES ('${username}', ${amount})`;
-      
+
           connection.query(query, (err, result) => {
             if (err) {
               console.error('Error adding record to database:', err);
-            } 
+            }
           });
         }
       }
     });
   });
- 
+
 });
 setcrash();
-server.listen(port,  () => {
+server.listen(port, () => {
   console.log(`Server running at :${port}/`);
 });
